@@ -244,21 +244,22 @@
     width:18px;
     height:18px;
     flex:none;
-    border-radius:50%;
+    border-radius:5px;
     border:1.5px solid #ccd1d9;
     background:#ffffff;
     position:relative;
-    transition:border-color .15s;
+    transition:border-color .15s, background-color .15s;
   }
   .topic-dot::after{
     content:"";
     position:absolute;
-    left:3px;
-    top:3px;
-    width:9px;
+    left:5px;
+    top:1px;
+    width:5px;
     height:9px;
-    border-radius:50%;
-    background:var(--amber);
+    border:solid #ffffff;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
     opacity:0;
     transition:opacity .1s;
   }
@@ -268,6 +269,7 @@
   }
   .topic-card.is-selected .topic-dot{
     border-color:var(--amber);
+    background:var(--amber);
   }
   .topic-card.is-selected .topic-dot::after{
     opacity:1;
@@ -431,7 +433,7 @@
       <div class="section">
         <div class="section-eyebrow">Tú decides lo próximo</div>
         <div class="section-title">¿Qué historia quieres que investiguemos?</div>
-        <div class="section-sub">El tema más votado puede convertirse en uno de nuestros próximos episodios.</div>
+        <div class="section-sub">Los temas más votados pueden convertirse en próximos episodios. <span style="opacity:.75;font-style:italic;">Puedes elegir varios.</span></div>
         <div class="topic-list" id="topicList"></div>
 
         <div class="open-idea">
@@ -455,7 +457,7 @@
       </div>
 
       <button type="submit" class="submit-btn" id="submitBtn">Enviar mi voto &rarr;</button>
-      <div class="error-msg" id="errorMsg">Puntúa al menos un episodio y elige un tema para poder enviar tu voto.</div>
+      <div class="error-msg" id="errorMsg">Puntúa al menos un episodio y elige al menos un tema para poder enviar tu voto.</div>
       <div class="fine">Respuesta anónima — no pedimos tu email, solo contamos el voto.</div>
     </form>
 
@@ -548,16 +550,15 @@ function renderTopics(){
     const label = document.createElement('label');
     label.className = 'topic-card';
     label.innerHTML =
-      '<input type="radio" class="topic-radio" name="topic-choice" value="' + topic.text + '">' +
+      '<input type="checkbox" class="topic-check" value="' + topic.text + '">' +
       '<span class="topic-dot"></span>' +
       '<span class="topic-text">' + topic.text + '</span>';
     list.appendChild(label);
   });
 
-  list.querySelectorAll('.topic-radio').forEach(function(input){
+  list.querySelectorAll('.topic-check').forEach(function(input){
     input.addEventListener('change', function(){
-      list.querySelectorAll('.topic-card').forEach(function(card){ card.classList.remove('is-selected'); });
-      input.closest('.topic-card').classList.add('is-selected');
+      input.closest('.topic-card').classList.toggle('is-selected', input.checked);
     });
   });
 }
@@ -599,16 +600,16 @@ function prepareSubmit(){
   const anyRating = episodes.some(function(ep){
     return document.querySelector('input[name="' + ep.ratingField + '"]:checked');
   });
-  const topicChosen = document.querySelector('.topic-radio:checked');
+  const topicsChosen = Array.from(document.querySelectorAll('.topic-check:checked')).map(function(el){ return el.value; });
 
-  if (!anyRating || !topicChosen){
+  if (!anyRating || topicsChosen.length === 0){
     document.getElementById('errorMsg').style.display = 'block';
     return false;
   }
   document.getElementById('errorMsg').style.display = 'none';
 
   document.getElementById('mce-EMAIL').value = 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2,8) + '@votos-suvschile.local';
-  document.getElementById('mce-Q_TEMA').value = topicChosen.value;
+  document.getElementById('mce-Q_TEMA').value = topicsChosen.join(' | ');
 
   const prefs = Array.from(document.querySelectorAll('.pref-input:checked')).map(function(el){ return el.value; });
   document.getElementById('mce-Q_PREFS').value = prefs.join(' | ');
