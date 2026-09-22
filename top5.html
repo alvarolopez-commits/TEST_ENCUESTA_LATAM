@@ -238,7 +238,7 @@
     border-color:#e6c98a;
     background:#fbf8f2;
   }
-  .topic-radio{
+  .topic-check{
     display:none;
   }
   .topic-dot{
@@ -305,37 +305,6 @@
   }
   .open-idea textarea::placeholder{
     color:#b3b8c2;
-  }
-
-  /* ===== PREFERENCIAS (chips multi-selección) ===== */
-  .chip-list{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .chip{
-    display:inline-flex;
-    align-items:center;
-    background:#f9fafb;
-    border:1.5px solid #e8eaed;
-    border-radius:20px;
-    padding:9px 16px;
-    font-size:12.5px;
-    font-weight:600;
-    color:var(--navy);
-    cursor:pointer;
-    transition:border-color .15s, background-color .15s, color .15s;
-  }
-  .chip input{
-    display:none;
-  }
-  .chip:hover{
-    border-color:#c9cedb;
-  }
-  .chip.is-selected{
-    background:var(--navy);
-    border-color:var(--navy);
-    color:#ffffff;
   }
 
   /* ===== CTA ===== */
@@ -443,16 +412,8 @@
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-eyebrow">¿Qué quieres ver más?</div>
-        <div class="section-title">¿Qué tipo de historias te interesan más?</div>
-        <div class="section-sub">Elige todas las que quieras.</div>
-        <div class="chip-list" id="prefList"></div>
-      </div>
-
       <input type="hidden" name="EMAIL" id="mce-EMAIL" value="">
       <input type="hidden" name="Q_TEMA" id="mce-Q_TEMA" value="">
-      <input type="hidden" name="Q_PREFS" id="mce-Q_PREFS" value="">
       <div aria-hidden="true" style="position: absolute; left: -5000px;">
         <input type="text" name="b_e9e870e21d6f8d94b00a7e3cb_dcb58c0080" tabindex="-1" value="">
       </div>
@@ -495,14 +456,9 @@ const nextTopics = [
   { text: "¿Por qué los SUV eléctricos siguen sin despegar?" },
   { text: "La nueva ofensiva china: ¿qué marcas van en serio en Latinoamérica?" },
   { text: "¿Quién puede permitirse hoy un coche nuevo en LATAM?" },
-  { text: "Híbrido vs. eléctrico: ¿qué está eligiendo realmente Latinoamérica?" }
-];
-
-const contentPreferences = [
-  "Mercados y tendencias",
-  "Marcas y estrategias",
-  "Tecnología y futuro",
-  "Historias y curiosidades de la industria"
+  { text: "Híbrido vs. eléctrico: ¿qué está eligiendo realmente Latinoamérica?" },
+  { text: "Movilidad compartida: ¿alternativa real o solo para las grandes ciudades?" },
+  { text: "Infraestructura de recarga: ¿el verdadero freno del eléctrico en la región?" }
 ];
 
 /* ============================================================
@@ -564,24 +520,6 @@ function renderTopics(){
   });
 }
 
-function renderPreferences(){
-  const list = document.getElementById('prefList');
-  contentPreferences.forEach(function(pref){
-    const label = document.createElement('label');
-    label.className = 'chip';
-    label.innerHTML =
-      '<input type="checkbox" class="pref-input" value="' + pref + '">' +
-      '<span>' + pref + '</span>';
-    list.appendChild(label);
-  });
-
-  list.querySelectorAll('.pref-input').forEach(function(input){
-    input.addEventListener('change', function(){
-      input.closest('.chip').classList.toggle('is-selected', input.checked);
-    });
-  });
-}
-
 function renderLastWinner(){
   if (!SHOW_LAST_WINNER) return;
   document.getElementById('lastWinnerTitle').textContent = lastWinner.title;
@@ -590,7 +528,6 @@ function renderLastWinner(){
 
 renderEpisodes();
 renderTopics();
-renderPreferences();
 renderLastWinner();
 
 /* ============================================================
@@ -611,9 +548,6 @@ function prepareSubmit(){
 
   document.getElementById('mce-EMAIL').value = 'anon-' + Date.now() + '-' + Math.random().toString(36).slice(2,8) + '@votos-suvschile.local';
   document.getElementById('mce-Q_TEMA').value = topicsChosen.join(' | ');
-
-  const prefs = Array.from(document.querySelectorAll('.pref-input:checked')).map(function(el){ return el.value; });
-  document.getElementById('mce-Q_PREFS').value = prefs.join(' | ');
 
   window.__mcSubmitted = true;
   return true;
